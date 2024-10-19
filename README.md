@@ -1,3 +1,6 @@
+
+![a_cool_futuristic_mascot_for_the_migratex](https://github.com/user-attachments/assets/8f1b6fb2-fbff-4b56-8cd6-d29d82d93efd)
+
 # MigrateX
 ## A Database Migration Tool
 
