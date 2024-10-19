@@ -3,22 +3,48 @@ package main
 import (
 	"database/sql"
 	"fmt"
-	_ "github.com/lib/pq"
 	"io/ioutil"
 	"log"
 	"os"
 	"path/filepath"
 	"sort"
+
+	_ "github.com/lib/pq"
+	"github.com/spf13/cobra"
 )
 
-func main() {
-	// Database connection parameters
-	dbHost := "localhost"
-	dbPort := "5432"
-	dbUser := "postgres"
-	dbPassword := "password"
-	dbName := "postgres"
+var rootCmd = &cobra.Command{
+	Use:   "migrate",
+	Short: "Database migration tool",
+	Run:   runMigrations,
+}
 
+var (
+	dbHost       string
+	dbPort       string
+	dbUser       string
+	dbPassword   string
+	dbName       string
+	migrationDir string
+)
+
+func init() {
+	// Add command line flags
+	rootCmd.PersistentFlags().StringVar(&dbHost, "dbHost", "localhost", "Database host")
+	rootCmd.PersistentFlags().StringVar(&dbPort, "dbPort", "5432", "Database port")
+	rootCmd.PersistentFlags().StringVar(&dbUser, "dbUser", "postgres", "Database user")
+	rootCmd.PersistentFlags().StringVar(&dbPassword, "dbPassword", "password", "Database password")
+	rootCmd.PersistentFlags().StringVar(&dbName, "dbName", "postgres", "Database name")
+	rootCmd.PersistentFlags().StringVar(&migrationDir, "migrationDir", "migrations", "Path to the migration files directory")
+}
+
+func main() {
+	if err := rootCmd.Execute(); err != nil {
+		log.Fatalf("Command failed: %v", err)
+	}
+}
+
+func runMigrations(cmd *cobra.Command, args []string) {
 	// Build the connection string
 	connStr := fmt.Sprintf(
 		"host=%s port=%s user=%s password=%s dbname=%s sslmode=disable",
@@ -45,7 +71,7 @@ func main() {
 	}
 
 	// Read migration files
-	migrationFiles, err := ioutil.ReadDir("migrations")
+	migrationFiles, err := ioutil.ReadDir(migrationDir)
 	if err != nil {
 		log.Fatalf("Failed to read migrations directory: %v", err)
 	}
@@ -115,7 +141,7 @@ func filterAndSortMigrations(files []os.FileInfo) []string {
 
 // applyMigration reads and executes a migration file
 func applyMigration(db *sql.DB, filename string) error {
-	path := filepath.Join("migrations", filename)
+	path := filepath.Join(migrationDir, filename)
 	content, err := ioutil.ReadFile(path)
 	if err != nil {
 		return err
