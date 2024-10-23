@@ -22,19 +22,20 @@ Clone the repository, build the project, and run it:
 
 ```bash
 go build -o migrate
-./migrate --dbHost="localhost" --dbPort="5432" --dbUser="postgres" --dbPassword="password" --dbName="mydb" --migrationDir="./migrations"
+./migrate --dbHost="localhost" --dbPort="5432" --dbUser="postgres" --dbPassword="password" --dbName="mydb" --migrationDir="./migrations" --sslMode="disable"
 ```
 
 ### Command-Line Flags:
 
-| Flag            | Default       | Description                              |
-|-----------------|---------------|------------------------------------------|
-| `--dbHost`      | `localhost`   | PostgreSQL host                          |
-| `--dbPort`      | `5432`        | PostgreSQL port                          |
-| `--dbUser`      | `postgres`    | PostgreSQL user                          |
-| `--dbPassword`  | `password`    | PostgreSQL password                      |
-| `--dbName`      | `postgres`    | PostgreSQL database name                 |
-| `--migrationDir`| `migrations`  | Path to the migration files directory    |
+| Flag             | Default      | Description                          |
+|------------------|--------------|--------------------------------------|
+| `--dbHost`       | `localhost`  | PostgreSQL host                      |
+| `--dbPort`       | `5432`       | PostgreSQL port                      |
+| `--dbUser`       | `postgres`   | PostgreSQL user                      |
+| `--dbPassword`   | `password`   | PostgreSQL password                  |
+| `--dbName`       | `postgres`   | PostgreSQL database name             |
+| `--migrationDir` | `migrations` | Path to the migration files directory |
+| `--sslMode`      | `disable`    | SSL Mode                             |
 
 ### Running with Docker
 

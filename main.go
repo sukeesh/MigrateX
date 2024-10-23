@@ -3,6 +3,7 @@ package main
 import (
 	"database/sql"
 	"fmt"
+	"github.com/sukeesh/k8s-db-migrate/validation"
 	"log"
 	"os"
 	"path/filepath"
@@ -46,6 +47,15 @@ func main() {
 }
 
 func runMigrations(cmd *cobra.Command, args []string) {
+
+	isValidated, err := validation.ValidateMigrationFiles(migrationDir)
+	if err != nil {
+		log.Fatalf("Validation failed: %v", err)
+	}
+	if !isValidated {
+		log.Fatalf("Validation failed: no migration files found")
+	}
+
 	// Build the connection string
 	connStr := fmt.Sprintf(
 		"host=%s port=%s user=%s password=%s dbname=%s sslmode=%s",
