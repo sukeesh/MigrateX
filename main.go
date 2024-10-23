@@ -3,7 +3,6 @@ package main
 import (
 	"database/sql"
 	"fmt"
-	"io/ioutil"
 	"log"
 	"os"
 	"path/filepath"
@@ -25,6 +24,7 @@ var (
 	dbUser       string
 	dbPassword   string
 	dbName       string
+	sslMode      string
 	migrationDir string
 )
 
@@ -36,6 +36,7 @@ func init() {
 	rootCmd.PersistentFlags().StringVar(&dbPassword, "dbPassword", "password", "Database password")
 	rootCmd.PersistentFlags().StringVar(&dbName, "dbName", "postgres", "Database name")
 	rootCmd.PersistentFlags().StringVar(&migrationDir, "migrationDir", "migrations", "Path to the migration files directory")
+	rootCmd.PersistentFlags().StringVar(&sslMode, "sslMode", "disable", "SSL mode for database connection (disable, require, verify-ca, verify-full)")
 }
 
 func main() {
@@ -47,8 +48,8 @@ func main() {
 func runMigrations(cmd *cobra.Command, args []string) {
 	// Build the connection string
 	connStr := fmt.Sprintf(
-		"host=%s port=%s user=%s password=%s dbname=%s sslmode=disable",
-		dbHost, dbPort, dbUser, dbPassword, dbName,
+		"host=%s port=%s user=%s password=%s dbname=%s sslmode=%s",
+		dbHost, dbPort, dbUser, dbPassword, dbName, sslMode,
 	)
 
 	// Connect to the database
@@ -71,7 +72,7 @@ func runMigrations(cmd *cobra.Command, args []string) {
 	}
 
 	// Read migration files
-	migrationFiles, err := ioutil.ReadDir(migrationDir)
+	migrationFiles, err := os.ReadDir(migrationDir)
 	if err != nil {
 		log.Fatalf("Failed to read migrations directory: %v", err)
 	}
@@ -128,7 +129,7 @@ func getAppliedMigrations(db *sql.DB) (map[string]bool, error) {
 }
 
 // filterAndSortMigrations filters .sql files and sorts them
-func filterAndSortMigrations(files []os.FileInfo) []string {
+func filterAndSortMigrations(files []os.DirEntry) []string {
 	var migrations []string
 	for _, file := range files {
 		if filepath.Ext(file.Name()) == ".sql" {
@@ -142,7 +143,7 @@ func filterAndSortMigrations(files []os.FileInfo) []string {
 // applyMigration reads and executes a migration file
 func applyMigration(db *sql.DB, filename string) error {
 	path := filepath.Join(migrationDir, filename)
-	content, err := ioutil.ReadFile(path)
+	content, err := os.ReadFile(path)
 	if err != nil {
 		return err
 	}
